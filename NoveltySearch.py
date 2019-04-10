@@ -20,34 +20,40 @@ class Controller:
     def __init__(self, vector = [
         # each robot response is a tuple of (left wheel speed, right wheel speed, probability to change state)
         # robot responses when robot is in state 0
-        (0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0),
+        0.0, 0.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0, 0.0,
         # robot responses when robot is in state 1
-        (0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)
+        0.0, 0.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0, 0.0
         ]):
         self.vector = vector
 
     def get_response(this, state, sensor_value):
         # state is 0 or 1
         # sensor_value is 0-3
+        index = 3*sensor_value
         if state==0:
-            return self.vector[sensor_value]
+            return (self.vector[index], self.vector[index+1], self.vector[index+2])
         else:
-            return self.vector[sensor_value+4]
+            return (self.vector[12+index], self.vector[12+index+1], self.vector[12+index+2])
 
     def __repr__(self):
         return str(self.vector)
 
 population = [ Controller(
-    list((rng.uniform(), rng.uniform(), rng.uniform()) for i in range(8))
+    list(rng.uniform() for i in range(24))
     ) for j in range(pop_size) ]
 
 for generation in range(num_gens):
-    with open('population.csv', 'w') as output:
-        writer = csv.writer(output)
+    with open('population.csv', 'w', newline='') as output_file:
+        writer = csv.writer(output_file)
         for controller in population:
             writer.writerow(controller.vector)
     
     subprocess.run(oracle)
-    
-    with open('features.csv', 'r') as input:
+
+    features = []
+    with open('features.csv', 'r', newline='') as input_file:
         # evaluate the feature results of the population, generate new generation
+        reader = csv.reader(input_file)
+        for row in reader:
+            features.append(list(map(float,row)))
+    print(str(features))
