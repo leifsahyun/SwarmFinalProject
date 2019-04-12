@@ -11,10 +11,12 @@ Author: Leif Sahyun
 import numpy.random as rng
 import csv
 import subprocess
+import math
 
 pop_size = 100
 num_gens = 10
 oracle = "bash oracle.sh"
+default_k = 15
 
 class Controller:
     def __init__(self, vector = [
@@ -25,6 +27,7 @@ class Controller:
         0.0, 0.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0, 0.0
         ]):
         self.vector = vector
+        self.novelty = -1
 
     def get_response(this, state, sensor_value):
         # state is 0 or 1
@@ -38,11 +41,26 @@ class Controller:
     def __repr__(self):
         return str(self.vector)
 
+# computes the distance between two feature vectors
+def dist(feature1, feature2):
+    total = 0
+    for i in range(len(feature1)):
+        total = total + math.pow(feature1[i] - feature2[i], 2.0)
+    return math.sqrt(total)
+
+# gets the k nearest neighbors of a feature vector in a list
+def get_k_neighbors(k, feature, feature_list):
+    neighbors = sorted(feature_list, key=lambda n: dist(feature, n))
+    return neighbors[:k]
+    
+archive = []
 population = [ Controller(
     list(rng.uniform() for i in range(24))
     ) for j in range(pop_size) ]
 
 for generation in range(num_gens):
+    print("Generation", generation)
+    
     with open('population.csv', 'w', newline='') as output_file:
         writer = csv.writer(output_file)
         for controller in population:
@@ -56,4 +74,15 @@ for generation in range(num_gens):
         reader = csv.reader(input_file)
         for row in reader:
             features.append(list(map(float,row)))
-    print(str(features))
+            
+    archive.extend(features)
+
+    for i in range(len(features)):
+        k_neighbors = get_k_neighbors(default_k, features[i], archive)
+        novelty = 1.0/default_k * sum(map(lambda n: dist(features[i], n), k_neighbors))
+        population[i].novelty = novelty
+
+    for c in population:
+        print(c.novelty, end=', ')
+    # genetic algorithm implementation goes here
+        
