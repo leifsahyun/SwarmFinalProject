@@ -18,6 +18,7 @@ num_gens = 10
 oracle = "bash oracle.sh"
 default_k = 15
 
+# represents a controller genome in the population
 class Controller:
     def __init__(self, vector = [
         # each robot response is a tuple of (left wheel speed, right wheel speed, probability to change state)
@@ -52,37 +53,47 @@ def dist(feature1, feature2):
 def get_k_neighbors(k, feature, feature_list):
     neighbors = sorted(feature_list, key=lambda n: dist(feature, n))
     return neighbors[:k]
-    
-archive = []
-population = [ Controller(
-    list(rng.uniform() for i in range(24))
-    ) for j in range(pop_size) ]
 
-for generation in range(num_gens):
-    print("Generation", generation)
-    
+# writes the current population to a file
+def export_population(population):
     with open('population.csv', 'w', newline='') as output_file:
         writer = csv.writer(output_file)
         for controller in population:
             writer.writerow(controller.vector)
     
-    subprocess.run(oracle)
-
+# reads the feature vectors from a file
+def import_features():
     features = []
     with open('features.csv', 'r', newline='') as input_file:
         # evaluate the feature results of the population, generate new generation
         reader = csv.reader(input_file)
         for row in reader:
             features.append(list(map(float,row)))
-            
-    archive.extend(features)
-
+    return features
+    
+# evaluates the features, associating novelty values with the population
+def eval_features(population, features, archive):
     for i in range(len(features)):
         k_neighbors = get_k_neighbors(default_k, features[i], archive)
         novelty = 1.0/default_k * sum(map(lambda n: dist(features[i], n), k_neighbors))
         population[i].novelty = novelty
 
-    for c in population:
-        print(c.novelty, end=', ')
-    # genetic algorithm implementation goes here
-        
+# runs the novelty search        
+def run():
+    archive = []
+    population = [ Controller(
+        list(rng.uniform() for i in range(24))
+        ) for j in range(pop_size) ]
+    for generation in range(num_gens):
+        print("Generation", generation)
+        export_population(population)
+        subprocess.check_call(oracle)
+        features = import_features()
+        archive.extend(features)
+        eval_features(population, features, archive)
+        for c in population:
+            print(c.novelty, end=', ')
+        # genetic algorithm implementation goes here
+
+if __name__=="__main__":
+    run()
