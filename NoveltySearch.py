@@ -7,6 +7,10 @@ produces a file containing arbitrary length feature vectors based on global swar
 novelty search uses these feature vectors to evaluate the novelty of each controller for evolution.
 Author: Leif Sahyun
 04/22/2019
+Dependencies:
+ - Numpy
+ - DEAP
+ - Matplotlib
 '''
 import numpy.random as rng
 import numpy
