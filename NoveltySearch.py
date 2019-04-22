@@ -6,41 +6,23 @@ a population of robot controllers and outputs them to a file. An oracle script i
 produces a file containing arbitrary length feature vectors based on global swarm behavior. The
 novelty search uses these feature vectors to evaluate the novelty of each controller for evolution.
 Author: Leif Sahyun
-04/10/2019
+04/22/2019
 '''
 import numpy.random as rng
+import numpy
 import csv
 import subprocess
 import math
+from deap import base, creator, tools
+import matplotlib.pyplot as plt
 
-pop_size = 100
-num_gens = 10
+pop_size = 10
+num_gens = 100
 oracle = "bash oracle.sh"
 default_k = 15
-
-# represents a controller genome in the population
-class Controller:
-    def __init__(self, vector = [
-        # each robot response is a tuple of (left wheel speed, right wheel speed, probability to change state)
-        # robot responses when robot is in state 0
-        0.0, 0.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0, 0.0,
-        # robot responses when robot is in state 1
-        0.0, 0.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0, 0.0
-        ]):
-        self.vector = vector
-        self.novelty = -1
-
-    def get_response(this, state, sensor_value):
-        # state is 0 or 1
-        # sensor_value is 0-3
-        index = 3*sensor_value
-        if state==0:
-            return (self.vector[index], self.vector[index+1], self.vector[index+2])
-        else:
-            return (self.vector[12+index], self.vector[12+index+1], self.vector[12+index+2])
-
-    def __repr__(self):
-        return str(self.vector)
+controller_size = 24
+crossover_probability = 0.5
+mutation_probability = 0.2
 
 # computes the distance between two feature vectors
 def dist(feature1, feature2):
@@ -49,9 +31,9 @@ def dist(feature1, feature2):
         total = total + math.pow(feature1[i] - feature2[i], 2.0)
     return math.sqrt(total)
 
-# gets the k nearest neighbors of a feature vector in a list
-def get_k_neighbors(k, feature, feature_list):
-    neighbors = sorted(feature_list, key=lambda n: dist(feature, n))
+# gets the k nearest neighbors of a feature vector in the archive
+def get_k_neighbors(k, feature, archive):
+    neighbors = sorted(archive, key=lambda n: dist(feature, n.features))
     return neighbors[:k]
 
 # writes the current population to a file
@@ -59,7 +41,7 @@ def export_population(population):
     with open('population.csv', 'w', newline='') as output_file:
         writer = csv.writer(output_file)
         for controller in population:
-            writer.writerow(controller.vector)
+            writer.writerow(controller)
     
 # reads the feature vectors from a file
 def import_features():
@@ -70,30 +52,70 @@ def import_features():
         for row in reader:
             features.append(list(map(float,row)))
     return features
+
+# associates feature vectors with the population
+def associate_features(population, features):
+    for i in range(len(population)):
+        population[i].features = features[i]
     
 # evaluates the features, associating novelty values with the population
-def eval_features(population, features, archive):
-    for i in range(len(features)):
-        k_neighbors = get_k_neighbors(default_k, features[i], archive)
-        novelty = 1.0/default_k * sum(map(lambda n: dist(features[i], n), k_neighbors))
-        population[i].novelty = novelty
+def eval_features(population, archive):
+    for individual in population:
+        k_neighbors = get_k_neighbors(default_k, individual.features, archive)
+        novelty = 1.0/default_k * sum(map(lambda n: dist(individual.features, n.features), k_neighbors))
+        individual.novelty = novelty
+
+def analyze(archive):
+    for i in range(24):        
+        elements = list(map(lambda c: c.features[i], archive))
+        plt.hist(elements, 20)#to_plot)
+        plt.show()
 
 # runs the novelty search        
 def run():
+    # DEAP population creation
+    toolbox = base.Toolbox()
+    creator.create("Controller", list, novelty=0.0, features=list)
+    toolbox.register("individual", tools.initRepeat,
+                     container=creator.Controller, func=rng.uniform, n=controller_size)
+    toolbox.register("population", tools.initRepeat,
+                     container=list, func=toolbox.individual)
+    pop = toolbox.population(n=pop_size)
     archive = []
-    population = [ Controller(
-        list(rng.uniform() for i in range(24))
-        ) for j in range(pop_size) ]
+    # DEAP toolbox registration
+    toolbox.register("mate", tools.cxTwoPoint)
+    toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
+    toolbox.register("select", tools.selTournament, tournsize=3, fit_attr='novelty')
+    # actual novelty search
     for generation in range(num_gens):
         print("Generation", generation)
-        export_population(population)
+        # use the oracle to find population feature vectors
+        export_population(pop)
         subprocess.check_call(oracle)
         features = import_features()
-        archive.extend(features)
-        eval_features(population, features, archive)
-        for c in population:
-            print(c.novelty, end=', ')
-        # genetic algorithm implementation goes here
+        associate_features(pop, features)
+        # add the current generation to the archive for comparison
+        archive.extend(pop)
+        # evaluate novelty
+        eval_features(pop, archive)
+        # create new generation with DEAP genetic toolbox
+        offspring = toolbox.select(pop, len(pop))
+        offspring = list(map(toolbox.clone, offspring))
+        # pairing every other child in offspring for possible crossover
+        for child1, child2 in zip(offspring[::2], offspring[1::2]):
+            if rng.uniform() < crossover_probability:
+                toolbox.mate(child1, child2)
+        # mutate offspring
+        for mutant in offspring:
+            if rng.uniform() < mutation_probability:
+                toolbox.mutate(mutant)
+            # reset novelty and features
+            mutant.novelty = 0.0
+            mutant.features = []
+        # update the population
+        pop[:] = offspring
+    # display results
+    analyze(archive)
 
 if __name__=="__main__":
     run()
