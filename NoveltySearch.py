@@ -70,9 +70,9 @@ def eval_features(population, archive):
         individual.novelty = novelty
 
 def analyze(archive):
-    for i in range(24):        
+    for i in range(controller_size):        
         elements = list(map(lambda c: c.features[i], archive))
-        plt.hist(elements, 20)#to_plot)
+        plt.hist(elements, 20)
         plt.show()
 
 # runs the novelty search        
