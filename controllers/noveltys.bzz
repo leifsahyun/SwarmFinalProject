@@ -1,0 +1,64 @@
+#Init 
+
+MAX = 10.0
+MIN = 4.0
+P = 0.34
+
+#function XW(features,weights){
+#w=size(weights)
+#l=size(features)
+#if (w==l){
+#
+#}
+#}
+
+function sigmoid(x){
+return 1.0/(1+math.exp(-x))
+}
+
+function sigmoider(x){
+return sigmoid(x)*(1.0 - sigmoid(x))
+}
+
+function robotState(k){
+if(k>=P){
+	return 1
+}
+else{
+	return 0
+}
+}
+
+function cRand(rid){
+r=math.rng.uniform(MIN,MAX)
+return r
+}
+
+function init() {
+s1=swarm.create(1)
+s1.select((id%2)==0)
+s2=s1.others(2)
+if(s1.in()){set_leds(255,0,0)}
+if(s2.in()){set_leds(0,255,0)}
+math.rng.setseed(id)
+i=0
+P={}
+while(i<5){
+P[i]={}
+P[i][0]=cRand(id)
+P[i][1]=cRand(id)
+set_wheels(P[i][0],P[i][1])
+i=i+1
+}
+}
+
+
+function step() {
+	state=robotState(math.rng.uniform(0.0,1.0))
+}
+
+function reset() {
+}
+
+function destroy() {
+}
