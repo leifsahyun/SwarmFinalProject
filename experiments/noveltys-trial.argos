@@ -21,15 +21,18 @@
       </actuators>
       <sensors>
         <range_and_bearing implementation="medium" medium="rab" show_rays="true" noise_std_dev="0" />
+	  <footbot_light implementation="rot_z_only"
+                       show_rays="true" />
+	<footbot_proximity implementation="default" />
+	<positioning         implementation="default" />
+	<footbot_turret_encoder implementation="default"/>
       </sensors>
-	   <params>
-		<wheel_turning hard_turn_angle_threshold="90"
+      <params>
+        <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="10" 
-		       parameter_file="best_100.dat" 
-			/>
-          </params>
+                       max_speed="10" />
+      </params>
     </buzz_controller_footbot>
   </controllers>
   <!-- ****************** -->
