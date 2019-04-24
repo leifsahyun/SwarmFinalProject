@@ -2,7 +2,7 @@
 
 MAX = 10.0
 MIN = 4.0
-P = 0.34
+PROB = 0.34 #Switching Probability
 
 #function XW(features,weights){
 #w=size(weights)
@@ -11,17 +11,24 @@ P = 0.34
 #
 #}
 #}
-
-function sigmoid(x){
-return 1.0/(1+math.exp(-x))
+function rtod(r) {
+   return (r*(180.0/math.pi))
 }
 
-function sigmoider(x){
-return sigmoid(x)*(1.0 - sigmoid(x))
+
+
+function sigmoid(x,deriv){
+p=1.0/(1+math.exp(-x))
+if(deriv==0){
+return p
+}
+if(deriv==1){
+return p*(1.0 - p) 
+}
 }
 
 function robotState(k){
-if(k>=P){
+if(k>=PROB){
 	return 1
 }
 else{
@@ -43,6 +50,9 @@ if(s2.in()){set_leds(0,255,0)}
 math.rng.setseed(id)
 i=0
 P={}
+Theta={}
+Posit={}
+
 while(i<5){
 P[i]={}
 P[i][0]=cRand(id)
@@ -55,6 +65,15 @@ i=i+1
 
 function step() {
 	state=robotState(math.rng.uniform(0.0,1.0))
+	set_wheels(cRand(rid),cRand(rid))
+  pos=pose.position
+	angle=pose.orientation
+#	log(turret_encoder)
+#log("x:",pos.x," y:",pos.y,"ang:",angle.yaw)
+Posit=pos.x
+#Posit[rid].b=pos.y
+Theta=angle.yaw
+log(Posit,Theta)
 }
 
 function reset() {
