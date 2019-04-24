@@ -1,0 +1,12 @@
+EXPERIMENT 1:
+1. 10 robots
+2. Single state
+3. Controller - [left_vel, right_vel]
+4. feature_vector:
+	avg. speed
+	avg. momentum
+	scatter
+	radial invariance
+	group rotation
+
+5. KNN - k value = 5

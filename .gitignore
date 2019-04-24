@@ -1,1 +1,4 @@
+# ignore following directory and files in it
 *.csv
+build/*
+.vscode/*
