@@ -42,17 +42,17 @@ return r
 }
 
 function init() {
-s1=swarm.create(1)
-s1.select((id%2)==0)
-s2=s1.others(2)
-if(s1.in()){set_led(255,0,0)}
-if(s2.in()){set_led(0,255,0)}
+#s1=swarm.create(1)
+#s1.select((id%2)==0)
+#s2=s1.others(2)
+#if(s1.in()){set_led(255,0,0)}
+#if(s2.in()){set_led(0,255,0)}
 math.rng.setseed(id)
 i=0
+vmag=0.0
 P={}
 Theta={}
 Posit={}
-
 while(i<5){
 P[id]={}
 P[id][0]=cRand(id)
@@ -65,18 +65,22 @@ i=i+1
 
 function step() {
 	state=robotState(math.rng.uniform(0.0,1.0))
-	set_wheels(cRand(rid),cRand(rid))
+	p=cRand(id)
+	set_wheels(p,p)
   pos=pose.position
 	angle=pose.orientation
-#	log(turret_encoder)
-#log("x:",pos.x," y:",pos.y,"ang:",angle.yaw)
-Posx=pos.x
-Posy=pos.y
-#Posit[rid].b=pos.y
-Theta=angle.yaw
-vl=wheels.velocity.left
-vr=wheels.velocity.right
-log(vl," ",vr)
+
+	Posx=pos.x
+	Posy=pos.y
+	Theta=angle.yaw
+	vl=wheels.velocity.left
+	vr=wheels.velocity.right
+	l=wheels.axis_length
+	log(vl," ",vr)
+	vx=(vl+vr)*(math.cos(angle.yaw))/2
+	vy=(vl+vr)*(math.sin(angle.yaw))/2
+
+	log(vx," ",vy)
 }
 
 function reset() {
