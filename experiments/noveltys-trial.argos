@@ -25,7 +25,7 @@
                        show_rays="true" />
 	<footbot_proximity implementation="default" />
 	<positioning         implementation="default" />
-	<footbot_turret_encoder implementation="default"/>
+	<differential_steering implementation="default"/>
       </sensors>
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
