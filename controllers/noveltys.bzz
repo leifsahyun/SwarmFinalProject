@@ -15,49 +15,41 @@ function rtod(r) {
    return (r*(180.0/math.pi))
 }
 
-
-
 function sigmoid(x,deriv){
-p=1.0/(1+math.exp(-x))
-if(deriv==0){
-return p
+	p=1.0/(1+math.exp(-x))
+	if(deriv==0){
+		return p
 }
 if(deriv==1){
-return p*(1.0 - p) 
+	return p*(1.0 - p) 
 }
 }
 
 function robotState(k){
-if(k>=PROB){
-	return 1
+	if(k>=PROB){
+		return 1
 }
 else{
-	return 0
+		return 0
 }
 }
 
 function cRand(rid){
-r=math.rng.uniform(MIN,MAX)
-return r
+		r=math.rng.uniform(MIN,MAX)	
+		return r
 }
 
 function init() {
-#s1=swarm.create(1)
-#s1.select((id%2)==0)
-#s2=s1.others(2)
-#if(s1.in()){set_led(255,0,0)}
-#if(s2.in()){set_led(0,255,0)}
 math.rng.setseed(id)
 i=0
 vmag=0.0
 P={}
 Theta={}
-Posit={}
+Velocity={.x=0.0,.y=0.0}
 while(i<5){
-P[id]={}
-P[id][0]=cRand(id)
-P[id][1]=cRand(id)
-set_wheels(P[id][0],P[id][1])
+P[0]=cRand(id)
+P[1]=cRand(id)
+set_wheels(P[0],P[1])
 i=i+1
 }
 }
@@ -65,22 +57,17 @@ i=i+1
 
 function step() {
 	state=robotState(math.rng.uniform(0.0,1.0))
-	p=cRand(id)
-	set_wheels(p,p)
-  pos=pose.position
-	angle=pose.orientation
-
-	Posx=pos.x
-	Posy=pos.y
-	Theta=angle.yaw
+	set_wheels(cRand(id),cRand(id))
+	Theta=pose.orientation.yaw
 	vl=wheels.velocity.left
 	vr=wheels.velocity.right
 	l=wheels.axis_length
 	log(vl," ",vr)
-	vx=(vl+vr)*(math.cos(angle.yaw))/2
-	vy=(vl+vr)*(math.sin(angle.yaw))/2
-
-	log(vx," ",vy)
+	vx=(vl+vr)*(math.cos(Theta))/2
+	vy=(vl+vr)*(math.sin(Theta))/2
+	Velocity.x=vx
+  Velocity.y=vy
+	log(Velocity.x," ",Velocity.y)
 }
 
 function reset() {
