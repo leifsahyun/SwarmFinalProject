@@ -34,10 +34,10 @@ find_package(Lua52 REQUIRED)
 include_directories(${LUA_INCLUDE_DIR})
 
 # Look for the (optional) galib library
-find_package(GALIB)
-if(GALIB_FOUND)
-  include_directories(${GALIB_INCLUDE_DIRS})
-endif(GALIB_FOUND)
+#find_package(GALIB)
+#if(GALIB_FOUND)
+#  include_directories(${GALIB_INCLUDE_DIRS})
+#endif(GALIB_FOUND)
 
 # Check for Buzz
 find_package(Buzz REQUIRED)
@@ -47,7 +47,7 @@ include_directories(${BUZZ_C_INCLUDE_DIR})
 #add_subdirectory(controllers)
 
 # Descend into the loop_functions directory
-#add_subdirectory(loop_functions)
+add_subdirectory(loop_functions)
 
 # Compile code
 #add_library(threshold_model SHARED threshold_model.h threshold_model.cpp)
