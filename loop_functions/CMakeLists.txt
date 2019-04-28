@@ -14,10 +14,13 @@ add_library(experiment1_loop_functions SHARED
 
 target_link_libraries(experiment1_loop_functions
   #footbot_nn
+  ${BUZZ_LIBRARY}  
   argos3core_simulator
   argos3plugin_simulator_dynamics2d
   argos3plugin_simulator_entities
   argos3plugin_simulator_footbot
   argos3plugin_simulator_genericrobot
   argos3plugin_simulator_media
+  argos3plugin_simulator_qtopengl
+  argos3plugin_simulator_buzz
   mpga)

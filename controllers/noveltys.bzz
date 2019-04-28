@@ -1,77 +1,72 @@
 #Init 
 
 MAX = 10.0
-MIN = 4.0
+MIN = -10.0
+
 PROB = 0.34 #Switching Probability
 
-#function XW(features,weights){
-#w=size(weights)
-#l=size(features)
-#if (w==l){
-#
-#}
-#}
-function rtod(r) {
-   return (r*(180.0/math.pi))
+function cRand(rid, r){
+	r=math.rng.uniform(MIN,MAX)	
+	return r
 }
 
-function sigmoid(x,deriv){
-	p=1.0/(1+math.exp(-x))
-	if(deriv==0){
-		return p
-}
-if(deriv==1){
-	return p*(1.0 - p) 
-}
-}
-
-function robotState(k){
-	if(k>=PROB){
-		return 1
-}
-else{
-		return 0
-}
-}
-
-function cRand(rid){
-		r=math.rng.uniform(MIN,MAX)	
-		return r
-}
 
 function init() {
-math.rng.setseed(id)
-i=0
-vmag=0.0
-P={}
-Theta={}
-Velocity={.x=0.0,.y=0.0}
-while(i<5){
-P[0]=cRand(id)
-P[1]=cRand(id)
-set_wheels(P[0],P[1])
-i=i+1
-}
+	count = 0
+	r = math.rng.setseed(math.rng.uniform(id))
+	i = 0
+	vmag = 0.0
+	robot_pose = {}
+	control_input = {}
+	Velocity = {}
+	generation = 0
+	while( i < 2) {
+		robot_pose[i] = 0.0
+		Velocity[i] = 0.0
+		i = i+1
+	}
+	# f = io.fopen("exp.dat","w")
 }
 
 
 function step() {
-	state=robotState(math.rng.uniform(0.0,1.0))
-	set_wheels(cRand(id),cRand(id))
-	Theta=pose.orientation.yaw
-	vl=wheels.velocity.left
-	vr=wheels.velocity.right
-	l=wheels.axis_length
-	log(vl," ",vr)
-	vx=(vl+vr)*(math.cos(Theta))/2
-	vy=(vl+vr)*(math.sin(Theta))/2
-	Velocity.x=vx
-  Velocity.y=vy
-	log(Velocity.x," ",Velocity.y)
+	if(count < 5) {
+		count = count +1
+	}
+
+	else {
+		if(size(control_input) == 0) {
+			r = math.rng.uniform(id*1.0)
+			control_input[0] = r*2.0
+			r = math.rng.uniform(id*1.0)
+			control_input[1] = r*2.0
+		}
+		else {
+			theta = pose.orientation.yaw
+			robot_pose[0] = pose.position.x
+			robot_pose[1] = pose.position.y
+
+			vl = wheels.velocity.left
+			vr = wheels.velocity.right
+			l = wheels.axis_length
+			# log(vl,"	",vr)
+			
+
+			vx = (vl+vr)*(math.cos(theta))/2
+			vy = (vl+vr)*(math.sin(theta))/2
+			
+			Velocity[0] = vx
+			Velocity[1] = vy
+			# log(velocity[0]," , ",velocity[1])
+
+			set_wheels(control_input[0],control_input[1])
+		}
+	}
 }
 
 function reset() {
 }
 
 function destroy() {
+	# io.fclose(f)
 }

@@ -48,6 +48,8 @@ include_directories(${BUZZ_C_INCLUDE_DIR})
 
 # Descend into the loop_functions directory
 add_subdirectory(loop_functions)
+# Descend into the embedding directory
+add_subdirectory(embedding)
 
 # Compile code
 #add_library(threshold_model SHARED threshold_model.h threshold_model.cpp)

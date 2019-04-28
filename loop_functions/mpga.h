@@ -5,6 +5,8 @@
 #include <argos3/core/utility/datatypes/datatypes.h>
 #include <argos3/core/utility/math/range.h>
 #include <argos3/core/utility/math/rng.h>
+#include <buzz/argos/buzz_loop_functions.h>
+#include "buzz/buzzvm.h"
 
 using namespace argos;
 

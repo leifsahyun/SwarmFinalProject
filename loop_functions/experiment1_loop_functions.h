@@ -8,7 +8,7 @@
 #include <buzz/argos/buzz_loop_functions.h>
 #include <argos3/core/utility/math/rng.h>
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
-
+#include "buzz/buzzvm.h"
 #include <loop_functions/mpga_loop_functions.h>
 
 /****************************************/
@@ -29,8 +29,8 @@
 *   I = number of inputs
 *   O = number of outputs
 */
-static const size_t GENOME_SIZE = 2;
-
+static const size_t GENOME_SIZE = 40;
+static const int VEC_2D_SIZE = 2;
 /****************************************/
 /****************************************/
 
@@ -43,7 +43,7 @@ public:
 	CMPGAExperiment1LoopFunctions();
 	virtual ~CMPGAExperiment1LoopFunctions();
 
-	virtual void Init(TConfigurationNode& t_node);
+	virtual void Init(TConfigurationNode& t_tree);
 	virtual void Reset();
 
 	/* Configures the robot controller from the genome */
@@ -54,17 +54,33 @@ public:
 	virtual void PostStep();
 
 	inline int GetNumRobots() const;
+	void CalculateNovelty();
+   virtual bool IsExperimentFinished();
+
+   /**
+    * Executes user-defined destruction logic.
+    * This method should undo whatever is done in Init().
+    * @see Init()
+    */
+   virtual void Destroy();
+
+
 
 	Real avg_speed;
 	Real scatter;
-	CVector2 ang_momentum;
-	CVector2 grp_rotation;
+	Real ang_momentum;
+	Real grp_rotation;
 	Real rad_variance;
-
 	CVector2 swarm_centroid;
-	int num_robots, int time_step;
+	int num_robots, time_step;
+	Real swarm_score;
 
 	std::vector<std::vector<Real> > feature_archive, feature_vector;
+	std::vector<float> l_wheel, r_wheel;
+
+	CRandom::CRNG* m_pcRNG;
+	std::ofstream ofs;
+	std::string m_strOutFile;
 
 private:
 
@@ -78,8 +94,7 @@ private:
 	CFootBotEntity* m_pcFootBot;
 	// CFootBotNNController* m_pcController;
 	Real* m_pfControllerParams;
-	CRandom::CRNG* m_pcRNG;
-	std::ofstream ofs;
+	// std::ofstream ofs;
 };
 
 #endif
