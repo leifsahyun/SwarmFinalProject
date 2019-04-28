@@ -86,7 +86,7 @@ struct SetRobotVelocity : public CBuzzLoopFunctions::COperation {
 		BuzzTablePut(t_vm, 0, m_pcLeftVel[ci]);
 		BuzzTablePut(t_vm, 1, m_pcRightVel[ci]);
 		ci++;
-		if(ci == 5)
+		if(ci == GENOME_SIZE)
 			ci = 0;
 		BuzzTableClose(t_vm);
 	}
@@ -174,6 +174,7 @@ void CMPGAExperiment1LoopFunctions::Init(TConfigurationNode& t_tree) {
 
 
 void CMPGAExperiment1LoopFunctions::PostStep() {
+	
 	GetRobotData cGetRobotData;
 	BuzzForeachVM(cGetRobotData);
 	int num_robots = GetNumRobots();
@@ -192,6 +193,14 @@ void CMPGAExperiment1LoopFunctions::PostStep() {
 		avg_speed  += std::sqrt(itr->second[0]*itr->second[0] + itr->second[1]*itr->second[1]);
 	}
 	avg_speed = avg_speed/num_robots*0.01;
+	   // 	std::vector<Real> m_pVecAvgSpeed;
+   	// std::vector<Real> m_pVecScatter;
+   	// std::vector<Real> m_pVecAngMomentum;
+   	// std::vector<Real> m_pVecGrpRotation;
+   	// std::vector<Real> m_pVecRadVariance;
+
+   	m_pVecAvgSpeed.push_back(avg_speed);
+
 
 	/*Get the scatter for the swarm*/
 	scatter = 0.0;
@@ -199,6 +208,8 @@ void CMPGAExperiment1LoopFunctions::PostStep() {
 		scatter += std::pow(itr->second[0] -  swarm_centroid.GetX(), 2) + std::pow(itr->second[1] -  swarm_centroid.GetY(), 2);
 	}
 	scatter /= (MAX_R*MAX_R*num_robots);
+
+	m_pVecScatter.push_back(scatter);
 
 	/*Get the radial variance for the swarm*/
 	rad_variance = 0.0;
@@ -208,6 +219,8 @@ void CMPGAExperiment1LoopFunctions::PostStep() {
 	}
 	variance /= (std::pow(MAX_R*num_robots,2));
 	rad_variance = scatter - variance;
+
+	m_pVecRadVariance.push_back(rad_variance);
 
 	/*Get the angular momentum*/
 	ang_momentum = 0.0;
@@ -220,6 +233,8 @@ void CMPGAExperiment1LoopFunctions::PostStep() {
 		ang_momentum = ang_momentum + temp_vel.CrossProduct(temp_var);
 	}
 	ang_momentum /= (num_robots*MAX_R);
+
+	m_pVecAngMomentum.push_back(ang_momentum);
 
 	/*Get the group rotation*/
 	grp_rotation = 0.0;
@@ -234,6 +249,8 @@ void CMPGAExperiment1LoopFunctions::PostStep() {
 		}
 	}
 	grp_rotation /= num_robots;
+
+	m_pVecGrpRotation.push_back(grp_rotation);
 
 }
 
@@ -314,14 +331,28 @@ Real CMPGAExperiment1LoopFunctions::Score() {
 	/* The performance is simply the distance of the robot to the origin */
 	// return m_pcFootBot->GetEmbodiedEntity().GetOriginAnchor().Position.Length();
 
-	std::vector<Real> temp_vec = {avg_speed, scatter, rad_variance, ang_momentum, grp_rotation};
+	// std::vector<Real> temp_vec = {avg_speed, scatter, rad_variance, ang_momentum, grp_rotation};
 	/*copy it to the feature vector*/
 	// feature_vector.push_back(temp_vec);
 
-	swarm_score = ang_momentum/scatter;
+	avg_speed = 0.0; scatter = 0.0; rad_variance = 0.0; ang_momentum = 0.0; grp_rotation = 0.0;
+	for(int i=0; i<m_pVecScatter.size(); i++) {
+		avg_speed += m_pVecAvgSpeed.at(i);
+		scatter += m_pVecScatter.at(i);
+		rad_variance += m_pVecRadVariance.at(i);
+		ang_momentum += m_pVecAngMomentum.at(i);
+		grp_rotation += m_pVecGrpRotation.at(i);
+	}
 
+
+	avg_speed /= m_pVecScatter.size();
+	scatter /= m_pVecScatter.size();
+	rad_variance /= m_pVecScatter.size();
+	ang_momentum /= m_pVecScatter.size();
+	grp_rotation /= m_pVecScatter.size();
+	
 	/*write code for fscore*/
-
+	swarm_score = ang_momentum/scatter;
 	return swarm_score;
 }
 

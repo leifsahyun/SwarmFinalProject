@@ -65,6 +65,11 @@ public:
    virtual void Destroy();
 
 
+   	std::vector<Real> m_pVecAvgSpeed;
+   	std::vector<Real> m_pVecScatter;
+   	std::vector<Real> m_pVecAngMomentum;
+   	std::vector<Real> m_pVecGrpRotation;
+   	std::vector<Real> m_pVecRadVariance;
 
 	Real avg_speed;
 	Real scatter;
