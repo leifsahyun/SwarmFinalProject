@@ -1,7 +1,7 @@
 #Init 
 
 MAX = 10.0
-MIN = -10.0
+MIN = 0.0
 
 PROB = 0.34 #Switching Probability
 
@@ -36,10 +36,8 @@ function step() {
 
 	else {
 		if(size(control_input) == 0) {
-			r = math.rng.uniform(id*1.0)
-			control_input[0] = r*2.0
-			r = math.rng.uniform(id*1.0)
-			control_input[1] = r*2.0
+			control_input[0] = cRand(id, r)
+			control_input[1] = cRand(id, r)
 		}
 		else {
 			theta = pose.orientation.yaw
