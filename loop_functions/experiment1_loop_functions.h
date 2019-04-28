@@ -5,7 +5,9 @@
 //#include <controllers/footbot_nn/footbot_nn_controller.h>
 
 /* ARGoS-related headers */
+#include <string>
 #include <buzz/argos/buzz_loop_functions.h>
+#include <buzz/argos/buzz_controller.h>
 #include <argos3/core/utility/math/rng.h>
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
 #include "buzz/buzzvm.h"
@@ -29,8 +31,12 @@
 *   I = number of inputs
 *   O = number of outputs
 */
+
+static const int NUM_ROBOTS = 20;
 static const size_t GENOME_SIZE = 4;
+
 static const int VEC_2D_SIZE = 2;
+
 /****************************************/
 /****************************************/
 
@@ -52,10 +58,14 @@ public:
 	/* Calculates the performance of the robot in a trial */
 	virtual Real Score();
 	virtual void PostStep();
+	virtual void PreStep();
 
 	inline int GetNumRobots() const;
 	void CalculateNovelty();
    virtual bool IsExperimentFinished();
+   void SendBuzzCommand();
+
+   void printErr(std::string in);
 
    /**
     * Executes user-defined destruction logic.
@@ -89,6 +99,10 @@ public:
 	CRandom::CRNG* m_pcRNG;
 	std::ofstream ofs;
 	std::string m_strOutFile;
+
+	std::vector<CFootBotEntity*> m_pVecFootbot;
+	std::vector<CBuzzController*> m_pVecControllers;
+	
 
 private:
 

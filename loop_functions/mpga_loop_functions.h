@@ -1,6 +1,7 @@
 #ifndef MPGA_LOOP_FUNCTIONS_H
 #define MPGA_LOOP_FUNCTIONS_H
 
+#include <argos3/core/simulator/loop_functions.h>
 #include <buzz/argos/buzz_loop_functions.h>
 #include <argos3/core/utility/math/rng.h>
 #include "buzz/buzzvm.h"

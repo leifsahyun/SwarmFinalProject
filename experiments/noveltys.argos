@@ -6,7 +6,7 @@
   <framework>
     <system threads="0" />
     <experiment length="120"
-                ticks_per_second="10"
+                ticks_per_second="1"
                 random_seed="123" />
   </framework>
   <!-- *************** -->
@@ -41,7 +41,7 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="50, 50, 1" center="0,0,0.5">
+  <arena size="500, 500, 1" center="0,0,0.5">
 
     <!-- <box id="wall_north" size="4,0.1,0.5" movable="false">
       <body position="0,2,0" orientation="0,0,0" />
@@ -68,7 +68,7 @@
     from a gaussian distribution, whose mean is zero degrees and
     standard deviation is 360 degrees.
     -->
-    <distribute>
+ <!--    <distribute>
       <position method="uniform" min="-2,-2,0" max="2,2,0" />
       <orientation method="uniform" min="0,0,0" max="360,0,0" />
       <entity quantity="20" max_trials="100">
@@ -76,7 +76,7 @@
       <controller config="bcf" />
       </foot-bot>
       </entity>
-    </distribute>
+    </distribute> -->
 
   </arena>
   <!-- ******************* -->

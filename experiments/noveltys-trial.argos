@@ -26,7 +26,7 @@
 	<footbot_proximity implementation="default"/>
       </sensors>
       <params bytecode_file = "controllers/noveltys.bo" debug_file = "controllers/noveltys.bdb"
-              parameter_file = "best_5.dat" >
+              parameter_file = "best_60.dat" >
 
       </params>
     </buzz_controller_footbot>
@@ -36,13 +36,14 @@
   <!-- ****************** -->
   <loop_functions library = "build/loop_functions/libexperiment1_loop_functions"
           label="experiment1_loop_functions"
+          arena_size = "500"
           trial = "0"
           outfile = "trial_data.dat">
   </loop_functions> 
    <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-<arena size="50, 50, 1" center="0,0,0.5">
+<arena size="500, 500, 1" center="0,0,0.5">
 
     <!-- <box id="wall_north" size="4,0.1,0.5" movable="false">
       <body position="0,2,0" orientation="0,0,0" />
@@ -69,7 +70,7 @@
     from a gaussian distribution, whose mean is zero degrees and
     standard deviation is 360 degrees.
     -->
-    <distribute>
+    <!-- <distribute>
       <position method="uniform" min="-1,-1,0" max="1,1,0" />
       <orientation method="uniform" min="0,0,0" max="360,0,0" />
       <entity quantity="20" max_trials="100">
@@ -77,7 +78,7 @@
       <controller config="bcf" />
       </foot-bot>
       </entity>
-    </distribute>
+    </distribute> -->
     </arena>  <!-- ******************* -->
   <!-- * Physics engines * -->
   <!-- ******************* -->

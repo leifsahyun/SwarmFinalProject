@@ -45,10 +45,10 @@ int main() {
    CMPGA cGA(CRange<Real>(-10.0,10.0),            // Allele range
              GENOME_SIZE,                         // Genome size
              5,                                   // Population size
-             0.05,                                // Mutation probability
+             0.2,                                // Mutation probability
              1,                                   // Number of trials
              5,                                 // Number of generations
-             true,                               // Minimize score
+             true,                               // Maximize score
              "experiments/noveltys.argos",            // .argos conf file
              &ScoreAggregator,                    // The score aggregator
              12345                                // Random seed
