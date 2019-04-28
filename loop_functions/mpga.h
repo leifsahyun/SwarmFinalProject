@@ -194,6 +194,11 @@ private:
 
       /** Pointer to the shared memory area */
       Real* m_pfSharedMem;
+	
+	    Real CMPGA::EuclideanDist(std::vector<Real> features1, std::vector<Real> features2);
+	    CMPGA::GetKNeighbors(int k, std::vector<Real> features, archive);
+	    void CMPGA::ComputeNovelty(std::vector<Real> features);
+	    ssh::vector<Real> archive;
 
    };
    

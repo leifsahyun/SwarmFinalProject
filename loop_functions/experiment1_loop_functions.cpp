@@ -261,9 +261,9 @@ void CMPGAExperiment1LoopFunctions::ConfigureFromGenome(const Real* pf_genome) {
 /****************************************/
 /****************************************/
 
-Real CMPGAExperiment1LoopFunctions::Score() {
-	/* The performance is simply the distance of the robot to the origin */
-	// return m_pcFootBot->GetEmbodiedEntity().GetOriginAnchor().Position.Length();
+std::vector<Real> CMPGAExperiment1LoopFunctions::Score() {
+	/* The score of a robot is its feature vector */
+	return feature_vector;
 }
 
 /****************************************/

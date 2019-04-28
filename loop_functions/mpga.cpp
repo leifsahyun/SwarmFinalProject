@@ -1,5 +1,6 @@
 #include "mpga.h"
 #include <cstdio>
+#include <math.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -53,7 +54,9 @@ CMPGA::CMPGA(const CRange<Real>& c_allele_range,
    m_strARGoSConf(str_argosconf),
    m_tScoreAggregator(t_score_aggregator),
    MasterPID(::getpid()),
-   m_cIndComparator(b_maximize ? SortHighToLow : SortLowToHigh) {
+   archive()
+   m_cIndComparator(b_maximize ? SortHighToLow : SortLowToHigh)
+   {
    /* Create shared memory manager */
    m_pcSharedMem = new CSharedMem(un_genome_size,
                                   un_pop_size);
@@ -130,6 +133,40 @@ void CMPGA::Cleanup() {
 /****************************************/
 /****************************************/
 
+Real CMPGA::EuclideanDist(std::vector<Real> features1, std::vector<Real> features2) {
+   Real total = 0;
+   for(UInt32 i=0; i<features1.size(); i++) {
+      total += std::pow(features1[i] - features2[i], 2.0);
+   }
+   return std::sqrt(total);
+}
+
+/****************************************/
+/****************************************/
+
+
+CMPGA::GetKNeighbors(int k, std::vector<Real> features, archive) {
+   neighbors = std::sort(archive, EuclideanDist);
+}
+
+/****************************************/
+/****************************************/
+
+void CMPGA::ComputeNovelty(std::vector<Real> features) {
+   for(UInt32 i = 0; i < m_unPopSize; ++i) {
+      k_neighbors = GetKNeighbors(5, m_tPopulation[i]->Score, archive);
+      Real novelty = 0;
+      for(UInt32 i = 0; i < k_neighbors.size(); i++) {
+         novelty += EuclideanDist(features, m_tPopulation[i]->Score);
+      }
+      novelty = novelty/5.0
+      
+   }
+}
+
+/****************************************/
+/****************************************/
+
 void CMPGA::Evaluate() {
    /* Set parameters for the processes and resume them */
    for(UInt32 i = 0; i < m_unPopSize; ++i) {
@@ -160,6 +197,11 @@ void CMPGA::Evaluate() {
    for(UInt32 i = 0; i < m_unPopSize; ++i) {
       m_tPopulation[i]->Score = m_pcSharedMem->GetScore(i);
    }
+   /* Copy the population to the archive */
+   
+   /* Compute the novelty of each controller in the population */
+   
+   
    /* Sort the population by score, from the best to the worst */
    std::sort(m_tPopulation.begin(),
              m_tPopulation.end(),
@@ -231,7 +273,7 @@ void CMPGA::LaunchARGoS(UInt32 un_slave_id) {
    /* Get a reference to the loop functions */
    CMPGALoopFunctions& cLoopFunctions = dynamic_cast<CMPGALoopFunctions&>(cSimulator.GetLoopFunctions());
    /* Create vector of scores */
-   std::vector<Real> vecScores(m_unNumTrials, 0.0);
+   std::vector<std::vector<Real>> vecScores(m_unNumTrials);
    /* Continue working until killed by parent */
    while(1) {
       /* Suspend yourself, waiting for parent's resume signal */
@@ -381,7 +423,7 @@ void CMPGA::CSharedMem::SetGenome(UInt32 un_individual,
 /****************************************/
 /****************************************/
 
-Real CMPGA::CSharedMem::GetScore(UInt32 un_individual) {
+std::vector<Real> CMPGA::CSharedMem::GetScore(UInt32 un_individual) {
    return m_pfSharedMem[un_individual * (m_unGenomeSize+1) + m_unGenomeSize];
 }
 
@@ -390,7 +432,7 @@ Real CMPGA::CSharedMem::GetScore(UInt32 un_individual) {
 
 
 void CMPGA::CSharedMem::SetScore(UInt32 un_individual,
-                                 Real f_score) {
+                                 std::vector<Real f_score) {
    m_pfSharedMem[un_individual * (m_unGenomeSize+1) + m_unGenomeSize] = f_score;
 }
 
