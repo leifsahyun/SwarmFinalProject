@@ -13,12 +13,16 @@ function cRand(rid, r){
 
 function init() {
 	count = 0
-	r = math.rng.setseed(math.rng.uniform(id))
+	r = math.rng.setseed(id)
 	i = 0
 	vmag = 0.0
 	robot_pose = {}
 	control_input = {}
 	Velocity = {}
+	state_vec = {}
+	state_vec[0]=0.0
+	state_vec[1]=0.0
+	state_vec[2]=0.0
 	generation = 0
 	while( i < 2) {
 		robot_pose[i] = 0.0
@@ -36,10 +40,12 @@ function step() {
 
 	else {
 		if(size(control_input) == 0) {
-			r = math.rng.uniform(id*1.0)
-			control_input[0] = r*2.0
-			r = math.rng.uniform(id*1.0)
-			control_input[1] = r*2.0
+			index = 0
+			while(index<4) {
+				r = math.rng.uniform(10.0)
+				control_input[index] = r
+				index = index+1
+			}
 		}
 		else {
 			theta = pose.orientation.yaw
@@ -58,8 +64,16 @@ function step() {
 			Velocity[0] = vx
 			Velocity[1] = vy
 			# log(velocity[0]," , ",velocity[1])
-
-			set_wheels(control_input[0],control_input[1])
+			
+			if(proximity!=nil){
+				if(proximity[0]<0.6){
+					set_wheels(control_input[0],control_input[1])
+				} else {
+					set_wheels(control_input[2],control_input[3])
+				}
+			} else {
+				log("proximity sensor not initialized")
+			}
 		}
 	}
 }

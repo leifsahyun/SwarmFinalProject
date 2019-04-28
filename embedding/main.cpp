@@ -6,7 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <loop_functions/mpga.h>
-#include <loop_functions/experiment1_loop_functions.h>
+#include "loop_functions/experiment1_loop_functions.h"
 #include <buzz/argos/buzz_loop_functions.h>
 #include "buzz/buzzvm.h"
 
@@ -47,7 +47,7 @@ int main() {
              5,                                   // Population size
              0.05,                                // Mutation probability
              1,                                   // Number of trials
-             50,                                 // Number of generations
+             5,                                 // Number of generations
              true,                               // Minimize score
              "experiments/noveltys.argos",            // .argos conf file
              &ScoreAggregator,                    // The score aggregator

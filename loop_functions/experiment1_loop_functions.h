@@ -1,5 +1,5 @@
-#ifndef MPGA_PHOTOTAXIS_LOOP_FUNCTIONS_H
-#define MPGA_PHOTOTAXIS_LOOP_FUNCTIONS_H
+#ifndef MPGA_EXPERIMENT1_LOOP_FUNCTIONS_H
+#define MPGA_EXPERIMENT1_LOOP_FUNCTIONS_H
 
 /* The NN controller */
 //#include <controllers/footbot_nn/footbot_nn_controller.h>
@@ -29,7 +29,7 @@
 *   I = number of inputs
 *   O = number of outputs
 */
-static const size_t GENOME_SIZE = 40;
+static const size_t GENOME_SIZE = 4;
 static const int VEC_2D_SIZE = 2;
 /****************************************/
 /****************************************/
@@ -76,6 +76,9 @@ public:
 	Real ang_momentum;
 	Real grp_rotation;
 	Real rad_variance;
+	Real homophily;
+	Real state_ratio;
+	Real switching_freq;
 	CVector2 swarm_centroid;
 	int num_robots, time_step;
 	Real swarm_score;

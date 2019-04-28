@@ -38,13 +38,14 @@ struct GetRobotData : public CBuzzLoopFunctions::COperation {
 				/* Set the mapping */
 				m_vecRobotsPose[t_vm->robot][i] = fPoseValue;
 			}
-
-			BuzzTableOpen(t_vm, "Velocity");
-			buzzobj_t tVelocity = BuzzGet(t_vm, "Velocity");
-			if(!buzzobj_istable(tVelocity)) {
-				LOGERR << str_robot_id << ": variable 'velocity' has wrong type " << buzztype_desc[tVelocity->o.type] << std::endl;
-				return;
-			}
+		}
+		
+		/*Velocity measurements*/
+		BuzzTableOpen(t_vm, "Velocity");
+		buzzobj_t tVelocity = BuzzGet(t_vm, "Velocity");
+		if(!buzzobj_istable(tVelocity)) {
+			LOGERR << str_robot_id << ": variable 'velocity' has wrong type " << buzztype_desc[tVelocity->o.type] << std::endl;
+			return;
 		}
 
 		m_vecRobotsVelocity[t_vm->robot].resize(VEC_2D_SIZE, 0.0);
@@ -64,14 +65,38 @@ struct GetRobotData : public CBuzzLoopFunctions::COperation {
 			}
 		}	
 
+		/* State measurements */
+		BuzzTableOpen(t_vm, "state_vec");
+		buzzobj_t tState = BuzzGet(t_vm, "state_vec");
+		/* Make sure it's the type we expect (a table) */
+		if(!buzzobj_istable(tState)) {
+			LOGERR << str_robot_id << ": variable 'state_vec' has wrong type " << buzztype_desc[tState->o.type] << std::endl;
+			return;
+		}
+		m_vecRobotsState[t_vm->robot].resize(3, 0.0);
+		
+		for(int i = 0; i < 3; ++i) {
+			buzzobj_t tStateValue = BuzzTableGet(t_vm, i);
+			/* Make sure it's the type we expect (a float) */
+			if(!buzzobj_isfloat(tStateValue)) {
+				LOGERR << str_robot_id << ": element 'state_vec[]' has wrong type " << buzztype_desc[tStateValue->o.type] <<std::endl;
+			}
+			else {
+				/* Get the value */
+				float fStateValue = buzzobj_getfloat(tStateValue);
+				/* Set the mapping */
+				m_vecRobotsState[t_vm->robot][i] = fStateValue;
+			}
+		}
+
 	}
 
-	/*map for pose*/
+	/*maps for pose, velocity, and robot state*/
 	std::map<int, std::vector<Real> > m_vecRobotsPose;
 	std::map<int, std::vector<Real> > m_vecRobotsVelocity;
+	/*robot state map contains a vector of homophily, switching frequency, and current state*/
+	std::map<int, std::vector<Real>> m_vecRobotsState;
 };
-
-int ci = 0;
 
 struct SetRobotVelocity : public CBuzzLoopFunctions::COperation {
 
@@ -80,14 +105,13 @@ struct SetRobotVelocity : public CBuzzLoopFunctions::COperation {
 
 	/** The action happens here */
 	virtual void operator()(const std::string& str_robot_id,buzzvm_t t_vm) {
-		// /* Set the values of the table 'stimulus' in the Buzz VM */
+		// /* Set the values of the table 'control_input' in the Buzz VM */
 		// int i=0;
 		BuzzTableOpen(t_vm, "control_input");
-		BuzzTablePut(t_vm, 0, m_pcLeftVel[ci]);
-		BuzzTablePut(t_vm, 1, m_pcRightVel[ci]);
-		ci++;
-		if(ci == GENOME_SIZE)
-			ci = 0;
+		for(int ci=0; ci<GENOME_SIZE; ci++){
+			BuzzTablePut(t_vm, ci, m_pcLeftVel[ci]);
+			BuzzTablePut(t_vm, ci+1, m_pcRightVel[ci]);
+		}
 		BuzzTableClose(t_vm);
 	}
 	/** Calculated stimuli */
@@ -249,6 +273,27 @@ void CMPGAExperiment1LoopFunctions::PostStep() {
 		}
 	}
 	grp_rotation /= num_robots;
+	
+	/*Get the average homophily, switching frequency, state ratio*/
+	homophily = 0.0;
+	switching_freq = 0.0;
+	Real num_state_0 = 0.0;
+	Real num_state_1 = 0.0;
+	for(auto itr = cGetRobotData.m_vecRobotsState.begin(); itr!=cGetRobotData.m_vecRobotsState.end(); itr++) {
+		homophily += itr->second[0];
+		switching_freq += itr->second[1];
+		Real state = itr->second[2];
+		if(state==0.0){
+			num_state_0++;
+		}
+		else if(state==1.0){
+			num_state_1++;
+		}
+	}
+	homophily /= num_robots;
+	switching_freq /= num_robots;
+	state_ratio = num_state_0/num_state_1;
+	
 
 	m_pVecGrpRotation.push_back(grp_rotation);
 
@@ -295,7 +340,7 @@ void CMPGAExperiment1LoopFunctions::ConfigureFromGenome(const Real* pf_genome) {
 	for(size_t i = 0; i < GENOME_SIZE; ++i) {
 		m_pfControllerParams[i] = pf_genome[i];
 	}
-
+	
 	if(l_wheel.empty() and r_wheel.empty()) {
 		for(int i=0; i<GENOME_SIZE; i++) {
 			if(i%2 == 0) 
@@ -314,7 +359,7 @@ void CMPGAExperiment1LoopFunctions::ConfigureFromGenome(const Real* pf_genome) {
 		}
 	}
 
-	for(int i=0; i<5; i++) {
+	for(int i=0; i<2; i++) {
 		LOG<<"l: "<<l_wheel.at(i)<<"		"<<r_wheel.at(i)<<std::endl;
 	}
 

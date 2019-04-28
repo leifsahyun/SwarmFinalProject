@@ -23,6 +23,7 @@
         <positioning      implementation="default" />
         <differential_steering  implementation="default" />
         <range_and_bearing    implementation="medium" medium="rab" show_rays="false" />
+	<footbot_proximity implementation="default"/>
       </sensors>
       <params bytecode_file = "controllers/noveltys.bo" debug_file = "controllers/noveltys.bdb"
               parameter_file = "best_5.dat" >
@@ -71,7 +72,7 @@
     <distribute>
       <position method="uniform" min="-1,-1,0" max="1,1,0" />
       <orientation method="uniform" min="0,0,0" max="360,0,0" />
-      <entity quantity="5" max_trials="100">
+      <entity quantity="20" max_trials="100">
       <foot-bot id="fb" rab_data_size="500">
       <controller config="bcf" />
       </foot-bot>
