@@ -3,7 +3,6 @@
 MAX = 10.0
 MIN = 0.0
 
-PROB = 0.34 #Switching Probability
 homophily_threshold = 25.0
 
 function cRand(rid, r){
@@ -47,8 +46,8 @@ function step() {
 		if(size(control_input) == 0) {
 			index = 0
 			while(index<12) {
-				r = math.rng.uniform(10.0)
-				control_input[index] = r
+				r=math.rng.uniform(10.0)
+				control_input[index] = r #0.0
 				index = index+1
 			}
 		}
@@ -147,6 +146,8 @@ function step() {
 					}
 				}
 			refactory = refactory-1
+			if(refactory<0)
+				refactory = 5
 			#} else {
 			#	log("proximity sensor not initialized")
 			#}

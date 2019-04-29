@@ -26,7 +26,7 @@
 	<footbot_proximity implementation="default" show_rays="true"/>
       </sensors>
       <params bytecode_file = "controllers/noveltys.bo" debug_file = "controllers/noveltys.bdb"
-              parameter_file = "best_50.dat" >
+              parameter_file = "best_150.dat" >
 
       </params>
     </buzz_controller_footbot>
