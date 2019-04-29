@@ -13,7 +13,7 @@ function cRand(rid, r){
 
 function init() {
 	count = 0
-	r = math.rng.setseed(id)
+	r = math.rng.setseed(0)#id)
 	i = 0
 	vmag = 0.0
 	robot_pose = {}
@@ -64,9 +64,9 @@ function step() {
 			Velocity[0] = vx
 			Velocity[1] = vy
 			# log(velocity[0]," , ",velocity[1])
-			
+
 			if(proximity!=nil){
-				if(proximity[0]<0.6){
+				if(proximity[0].value>0.05){
 					set_wheels(control_input[0],control_input[1])
 				} else {
 					set_wheels(control_input[2],control_input[3])

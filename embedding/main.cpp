@@ -47,7 +47,7 @@ int main() {
              5,                                   // Population size
              0.2,                                // Mutation probability
              1,                                   // Number of trials
-             5,                                 // Number of generations
+             50,                                 // Number of generations
              true,                               // Maximize score
              "experiments/noveltys.argos",            // .argos conf file
              &ScoreAggregator,                    // The score aggregator

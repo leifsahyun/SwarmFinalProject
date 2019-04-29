@@ -108,9 +108,9 @@ struct SetRobotVelocity : public CBuzzLoopFunctions::COperation {
 		// /* Set the values of the table 'control_input' in the Buzz VM */
 		// int i=0;
 		BuzzTableOpen(t_vm, "control_input");
-		for(int ci=0; ci<GENOME_SIZE; ci++){
-			BuzzTablePut(t_vm, ci, m_pcLeftVel[ci]);
-			BuzzTablePut(t_vm, ci+1, m_pcRightVel[ci]);
+		for(int ci=0; ci<GENOME_SIZE/2; ci++){
+			BuzzTablePut(t_vm, 2*ci, m_pcLeftVel[ci]);
+			BuzzTablePut(t_vm, 2*ci+1, m_pcRightVel[ci]);
 		}
 		BuzzTableClose(t_vm);
 	}
@@ -161,7 +161,7 @@ void CMPGAExperiment1LoopFunctions::Init(TConfigurationNode& t_tree) {
         // CVector3 pos;
     	printErr("in loop for placing the robots");
         m_vecInitSetup[i].Position.FromSphericalCoords(	
-                m_pcRNG->Uniform(CRange<Real>(-5.0, 5.0)),
+                m_pcRNG->Uniform(CRange<Real>(-2.0, 2.0)),
                 CRadians::PI_OVER_TWO,
                 m_pcRNG->Uniform(CRange<CRadians>(CRadians(-180.0), CRadians(180.0))));
         m_vecInitSetup[i].Position.SetZ(0.0);
@@ -453,7 +453,7 @@ Real CMPGAExperiment1LoopFunctions::Score() {
 	grp_rotation /= m_pVecScatter.size();
 	
 	/*write code for fscore*/
-	swarm_score = avg_speed/(scatter*rad_variance*grp_rotation);
+	swarm_score = 1/scatter; //avg_speed/(scatter*rad_variance*grp_rotation);
 	return swarm_score;
 }
 
