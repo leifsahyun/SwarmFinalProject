@@ -4,6 +4,7 @@ MAX = 10.0
 MIN = 0.0
 
 PROB = 0.34 #Switching Probability
+homophily_threshold = 0.75
 
 function cRand(rid, r){
 	r=math.rng.uniform(MIN,MAX)	
@@ -24,6 +25,9 @@ function init() {
 	state_vec[1]=0.0
 	state_vec[2]=0.0
 	generation = 0
+	curr_state = 0
+	state0 = swarm.create(0)
+	state1 = swarm.create(1)
 	while( i < 2) {
 		robot_pose[i] = 0.0
 		Velocity[i] = 0.0
@@ -65,15 +69,47 @@ function step() {
 			Velocity[1] = vy
 			# log(velocity[0]," , ",velocity[1])
 
+			# state measurements
+			#current state
+			state_vec[2] = float(curr_state)
+			if(curr_state==1)
+				set_leds(255,0,0)
+			else
+				set_leds(0,0,255)
+				
+			total_kin = neighbors.kin().reduce(function(rid,data,accum){
+				if(data.distance<homophily_threshold)
+					return accum+1}, 0)
+			total_neighbors = neighbors.reduce(function(rid,data,accum){
+				if(data.distance<homophily_threshold)
+					return accum+1}, 0)
+			#homophily
+			state_vec[0] = total_kin/total_neighbors
+
 			if(proximity!=nil){
 				if(proximity[0].value>0.05){
-					set_wheels(control_input[0],control_input[1])
+					if(curr_state==0)
+						set_wheels(control_input[0],control_input[1])
+					else
+						set_wheels(control_input[2],control_input[3])
 				} else {
-					set_wheels(control_input[2],control_input[3])
+					if(curr_state==0)
+						set_wheels(control_input[4],control_input[5])
+					else
+						set_wheels(control_input[6],control_input[7])
+				}
+				if(math.rng.uniform(1.0)<PROB){
+					curr_state = 1-curr_state
+					#state switching
+					state_vec[1] = state_vec[1]+1
 				}
 			} else {
 				log("proximity sensor not initialized")
 			}
+			state0.leave()
+			state1.leave()
+			state0.select(curr_state==0)
+			state1.select(curr_state==1)
 		}
 	}
 }

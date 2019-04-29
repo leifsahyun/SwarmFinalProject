@@ -33,7 +33,7 @@
 */
 
 static const int NUM_ROBOTS = 20;
-static const size_t GENOME_SIZE = 4;
+static const size_t GENOME_SIZE = 8;
 
 static const int VEC_2D_SIZE = 2;
 
@@ -80,6 +80,9 @@ public:
    	std::vector<Real> m_pVecAngMomentum;
    	std::vector<Real> m_pVecGrpRotation;
    	std::vector<Real> m_pVecRadVariance;
+	std::vector<Real> m_pVecHomophily;
+	std::vector<Real> m_pVecSwitchingFreq;
+	std::vector<Real> m_pVecStateRatio;
 
 	Real avg_speed;
 	Real scatter;

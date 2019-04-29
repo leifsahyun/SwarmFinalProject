@@ -161,7 +161,7 @@ void CMPGAExperiment1LoopFunctions::Init(TConfigurationNode& t_tree) {
         // CVector3 pos;
     	printErr("in loop for placing the robots");
         m_vecInitSetup[i].Position.FromSphericalCoords(	
-                m_pcRNG->Uniform(CRange<Real>(-2.0, 2.0)),
+                m_pcRNG->Uniform(CRange<Real>(-1.5, 1.5)),
                 CRadians::PI_OVER_TWO,
                 m_pcRNG->Uniform(CRange<CRadians>(CRadians(-180.0), CRadians(180.0))));
         m_vecInitSetup[i].Position.SetZ(0.0);
@@ -332,9 +332,10 @@ void CMPGAExperiment1LoopFunctions::PostStep() {
 	switching_freq /= num_robots;
 	state_ratio = num_state_0/num_state_1;
 	
-
+	m_pVecHomophily.push_back(homophily);
+	m_pVecSwitchingFreq.push_back(switching_freq);
+	m_pVecStateRatio.push_back(state_ratio);
 	
-
 }
 
 
@@ -437,23 +438,29 @@ Real CMPGAExperiment1LoopFunctions::Score() {
 	// feature_vector.push_back(temp_vec);
 
 	avg_speed = 0.0; scatter = 0.0; rad_variance = 0.0; ang_momentum = 0.0; grp_rotation = 0.0;
+	homophily = 0.0; switching_freq = 0.0; state_ratio = 0.0;
 	for(int i=0; i<m_pVecScatter.size(); i++) {
 		avg_speed += m_pVecAvgSpeed.at(i);
 		scatter += m_pVecScatter.at(i);
 		rad_variance += m_pVecRadVariance.at(i);
 		ang_momentum += m_pVecAngMomentum.at(i);
 		grp_rotation += m_pVecGrpRotation.at(i);
+		homophily += m_pVecHomophily.at(i);
+		switching_freq += m_pVecSwitchingFreq.at(i);
+		state_ratio += m_pVecStateRatio.at(i);
 	}
-
 
 	avg_speed /= m_pVecScatter.size();
 	scatter /= m_pVecScatter.size();
 	rad_variance /= m_pVecScatter.size();
 	ang_momentum /= m_pVecScatter.size();
 	grp_rotation /= m_pVecScatter.size();
+	homophily /= m_pVecScatter.size();
+	switching_freq /= m_pVecScatter.size();
+	state_ratio /= m_pVecScatter.size();
 	
 	/*write code for fscore*/
-	swarm_score = 1/scatter; //avg_speed/(scatter*rad_variance*grp_rotation);
+	swarm_score = grp_rotation;//avg_speed/(scatter*rad_variance*grp_rotation);
 	return swarm_score;
 }
 
