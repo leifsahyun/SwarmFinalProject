@@ -14,7 +14,7 @@ function cRand(rid, r){
 
 function init() {
 	count = 0
-	r = math.rng.setseed(0)#id)
+	r = math.rng.setseed(id)
 	i = 0
 	vmag = 0.0
 	robot_pose = {}
@@ -25,7 +25,7 @@ function init() {
 	state_vec[1]=0.0
 	state_vec[2]=0.0
 	generation = 0
-	curr_state = 0
+	curr_state = 0.0
 	state0 = swarm.create(0)
 	state1 = swarm.create(1)
 	while( i < 2) {
@@ -45,7 +45,7 @@ function step() {
 	else {
 		if(size(control_input) == 0) {
 			index = 0
-			while(index<4) {
+			while(index<8) {
 				r = math.rng.uniform(10.0)
 				control_input[index] = r
 				index = index+1
@@ -71,8 +71,8 @@ function step() {
 
 			# state measurements
 			#current state
-			state_vec[2] = float(curr_state)
-			if(curr_state==1)
+			state_vec[2] = curr_state
+			if(curr_state==1.0)
 				set_leds(255,0,0)
 			else
 				set_leds(0,0,255)
@@ -84,16 +84,19 @@ function step() {
 				if(data.distance<homophily_threshold)
 					return accum+1}, 0)
 			#homophily
-			state_vec[0] = total_kin/total_neighbors
+			if(total_neighbors>0)
+				state_vec[0] = float(total_kin)/total_neighbors
+			else
+				state_vec[0] = 0.0
 
 			if(proximity!=nil){
 				if(proximity[0].value>0.05){
-					if(curr_state==0)
+					if(curr_state==0.0)
 						set_wheels(control_input[0],control_input[1])
 					else
 						set_wheels(control_input[2],control_input[3])
 				} else {
-					if(curr_state==0)
+					if(curr_state==0.0)
 						set_wheels(control_input[4],control_input[5])
 					else
 						set_wheels(control_input[6],control_input[7])
