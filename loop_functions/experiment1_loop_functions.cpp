@@ -328,6 +328,9 @@ void CMPGAExperiment1LoopFunctions::PostStep() {
 		else if(state==1.0){
 			num_state_1++;
 		}
+		//LOG << "state measurements: " << itr->second[0] << ", " << itr->second[1] << ", " << itr->second[2] << std::endl;
+		//LOG << "total switching: " << switching_freq << std::endl;
+		//LOG.Flush();
 	}
 	homophily /= NUM_ROBOTS;
 	switching_freq /= NUM_ROBOTS;
@@ -424,7 +427,7 @@ void CMPGAExperiment1LoopFunctions::ConfigureFromGenome(const Real* pf_genome) {
 		}
 	}
 
-	for(int i=0; i<2; i++) {
+	for(int i=0; i<4; i++) {
 		LOG<<"controller: "<<l_wheel.at(i)<<"		"<<r_wheel.at(i)<<"		"<<s_prob.at(i)<<std::endl;
 		LOG.Flush();
 	}
@@ -469,7 +472,7 @@ Real CMPGAExperiment1LoopFunctions::Score() {
 	state_ratio /= m_pVecScatter.size();
 	
 	/*write code for fscore*/
-	swarm_score = switching_freq;//avg_speed/(scatter*rad_variance*grp_rotation);
+	swarm_score = homophily/(scatter*switching_freq);//avg_speed/(scatter*rad_variance*grp_rotation);
 	return swarm_score;
 }
 

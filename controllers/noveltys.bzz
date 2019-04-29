@@ -4,7 +4,7 @@ MAX = 10.0
 MIN = 0.0
 
 PROB = 0.34 #Switching Probability
-homophily_threshold = 0.75
+homophily_threshold = 25.0
 
 function cRand(rid, r){
 	r=math.rng.uniform(MIN,MAX)	
@@ -78,45 +78,59 @@ function step() {
 				set_leds(0,0,255)
 				
 			total_kin = neighbors.kin().reduce(function(rid,data,accum){
-				if(data.distance<homophily_threshold)
-					return accum+1}, 0)
+				if(accum==nil)
+					accum = 0.0
+				if(data.distance<homophily_threshold){
+					return (accum+1.0)
+				}
+			}, 0.0)
 			total_neighbors = neighbors.reduce(function(rid,data,accum){
-				if(data.distance<homophily_threshold)
-					return accum+1}, 0)
+				if(accum==nil)
+					accum = 0.0
+				if(data.distance<homophily_threshold){
+					return (accum+1.0)
+				}
+			}, 0.0)
 			#homophily
-			if(total_neighbors>0)
-				state_vec[0] = float(total_kin)/total_neighbors
+			if(total_neighbors>0.0)
+				state_vec[0] = total_kin/total_neighbors
 			else
 				state_vec[0] = 0.0
 
 			if(proximity!=nil){
+				state_vec[1] = 0.0
 				if(proximity[0].value>0.05){
 					if(curr_state==0.0){
 						set_wheels(control_input[0],control_input[1])
-						if(math.rng.uniform(1.0)<control_input[2])
+						if(math.rng.uniform(1.0)<(control_input[2]+10)/20){
+							#state switching
 							curr_state = 1-curr_state
+							state_vec[1] = 1.0
+						}
 					} else {
 						set_wheels(control_input[3],control_input[4])
-						if(math.rng.uniform(1.0)<control_input[5])
+						if(math.rng.uniform(1.0)<(control_input[5]+10)/20){
+							#state switching
 							curr_state = 1-curr_state
+							state_vec[1] = 1.0
+						}
 					}
 				} else {
 					if(curr_state==0.0){
 						set_wheels(control_input[6],control_input[7])
-						if(math.rng.uniform(1.0)<control_input[8])
+						if(math.rng.uniform(1.0)<(control_input[8]+10)/20){
+							#state switching
 							curr_state = 1-curr_state
+							state_vec[1] = 1.0
+						}
 					} else {
 						set_wheels(control_input[9],control_input[10])
-						if(math.rng.uniform(1.0)<control_input[11])
+						if(math.rng.uniform(1.0)<(control_input[11]+10)/20){
+							#state switching
 							curr_state = 1-curr_state
+							state_vec[1] = 1.0
+						}
 					}
-				}
-				if(math.rng.uniform(1.0)<PROB){
-					curr_state = 1-curr_state
-					#state switching
-					state_vec[1] = 1.0
-				} else {
-					state_vec[1] = 0.0
 				}
 			} else {
 				log("proximity sensor not initialized")
