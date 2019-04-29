@@ -33,7 +33,7 @@
 */
 
 static const int NUM_ROBOTS = 20;
-static const size_t GENOME_SIZE = 8;
+static const size_t GENOME_SIZE = 12;
 
 static const int VEC_2D_SIZE = 2;
 
@@ -97,7 +97,7 @@ public:
 	Real swarm_score;
 
 	std::vector<std::vector<Real> > feature_archive, feature_vector;
-	std::vector<float> l_wheel, r_wheel;
+	std::vector<float> l_wheel, r_wheel, s_prob;
 
 	CRandom::CRNG* m_pcRNG;
 	std::ofstream ofs;

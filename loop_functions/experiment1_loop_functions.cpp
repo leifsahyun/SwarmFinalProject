@@ -101,21 +101,22 @@ struct GetRobotData : public CBuzzLoopFunctions::COperation {
 struct SetRobotVelocity : public CBuzzLoopFunctions::COperation {
 
 	/** Constructor */
-	SetRobotVelocity(const std::vector<float> l_vel, const std::vector<float> r_vel) : m_pcLeftVel(l_vel), m_pcRightVel(r_vel) {}
+	SetRobotVelocity(const std::vector<float> l_vel, const std::vector<float> r_vel, const std::vector<float> s_prob) : m_pcLeftVel(l_vel), m_pcRightVel(r_vel), m_pcStateProb(s_prob) {}
 
 	/** The action happens here */
 	virtual void operator()(const std::string& str_robot_id,buzzvm_t t_vm) {
 		// /* Set the values of the table 'control_input' in the Buzz VM */
 		// int i=0;
 		BuzzTableOpen(t_vm, "control_input");
-		for(int ci=0; ci<GENOME_SIZE/2; ci++){
-			BuzzTablePut(t_vm, 2*ci, m_pcLeftVel[ci]);
-			BuzzTablePut(t_vm, 2*ci+1, m_pcRightVel[ci]);
+		for(int ci=0; ci<GENOME_SIZE/3; ci++){
+			BuzzTablePut(t_vm, 3*ci, m_pcLeftVel[ci]);
+			BuzzTablePut(t_vm, 3*ci+1, m_pcRightVel[ci]);
+			BuzzTablePut(t_vm, 3*ci+2, m_pcStateProb[ci]);
 		}
 		BuzzTableClose(t_vm);
 	}
 	/** Calculated stimuli */
-	const std::vector<float> m_pcLeftVel, m_pcRightVel;
+	const std::vector<float> m_pcLeftVel, m_pcRightVel, m_pcStateProb;
 };
 
 inline int CMPGAExperiment1LoopFunctions::GetNumRobots() const {
@@ -328,9 +329,13 @@ void CMPGAExperiment1LoopFunctions::PostStep() {
 			num_state_1++;
 		}
 	}
-	homophily /= num_robots;
-	switching_freq /= num_robots;
-	state_ratio = num_state_0/num_state_1;
+	homophily /= NUM_ROBOTS;
+	switching_freq /= NUM_ROBOTS;
+	if(num_state_1>num_state_0)
+		state_ratio = num_state_0/(num_state_0+num_state_1);
+	else
+		state_ratio = num_state_1/(num_state_0+num_state_1);
+	
 	
 	m_pVecHomophily.push_back(homophily);
 	m_pVecSwitchingFreq.push_back(switching_freq);
@@ -399,24 +404,28 @@ void CMPGAExperiment1LoopFunctions::ConfigureFromGenome(const Real* pf_genome) {
 	
 	if(l_wheel.empty() and r_wheel.empty()) {
 		for(int i=0; i<GENOME_SIZE; i++) {
-			if(i%2 == 0) 
+			if(i%3 == 0) 
 				l_wheel.push_back(m_pfControllerParams[i]);
-			else
+			else if(i%3 == 1)
 				r_wheel.push_back(m_pfControllerParams[i]);
+			else
+				s_prob.push_back(m_pfControllerParams[i]);
 		}
 	}
 
 	else {
 		for(int i=0; i<GENOME_SIZE; i++) {
-			if(i%2 == 0) 
-				l_wheel.at(i/2) = m_pfControllerParams[i];
+			if(i%3 == 0) 
+				l_wheel.at(i/3) = m_pfControllerParams[i];
+			else if(i%3 == 1)
+				r_wheel.at(i/3) = m_pfControllerParams[i];
 			else
-				r_wheel.at(i/2) = m_pfControllerParams[i];
+				s_prob.at(i/3) = m_pfControllerParams[i];
 		}
 	}
 
 	for(int i=0; i<2; i++) {
-		LOG<<"l: "<<l_wheel.at(i)<<"		"<<r_wheel.at(i)<<std::endl;
+		LOG<<"controller: "<<l_wheel.at(i)<<"		"<<r_wheel.at(i)<<"		"<<s_prob.at(i)<<std::endl;
 		LOG.Flush();
 	}
 
@@ -460,7 +469,7 @@ Real CMPGAExperiment1LoopFunctions::Score() {
 	state_ratio /= m_pVecScatter.size();
 	
 	/*write code for fscore*/
-	swarm_score = grp_rotation;//avg_speed/(scatter*rad_variance*grp_rotation);
+	swarm_score = switching_freq;//avg_speed/(scatter*rad_variance*grp_rotation);
 	return swarm_score;
 }
 
@@ -469,7 +478,7 @@ void CMPGAExperiment1LoopFunctions::Destroy() {
 }
 
 void CMPGAExperiment1LoopFunctions::SendBuzzCommand() {
-	BuzzForeachVM(SetRobotVelocity(l_wheel, r_wheel));
+	BuzzForeachVM(SetRobotVelocity(l_wheel, r_wheel, s_prob));
 }
 
 bool CMPGAExperiment1LoopFunctions::IsExperimentFinished() {

@@ -45,7 +45,7 @@ function step() {
 	else {
 		if(size(control_input) == 0) {
 			index = 0
-			while(index<8) {
+			while(index<12) {
 				r = math.rng.uniform(10.0)
 				control_input[index] = r
 				index = index+1
@@ -91,20 +91,32 @@ function step() {
 
 			if(proximity!=nil){
 				if(proximity[0].value>0.05){
-					if(curr_state==0.0)
+					if(curr_state==0.0){
 						set_wheels(control_input[0],control_input[1])
-					else
-						set_wheels(control_input[2],control_input[3])
+						if(math.rng.uniform(1.0)<control_input[2])
+							curr_state = 1-curr_state
+					} else {
+						set_wheels(control_input[3],control_input[4])
+						if(math.rng.uniform(1.0)<control_input[5])
+							curr_state = 1-curr_state
+					}
 				} else {
-					if(curr_state==0.0)
-						set_wheels(control_input[4],control_input[5])
-					else
+					if(curr_state==0.0){
 						set_wheels(control_input[6],control_input[7])
+						if(math.rng.uniform(1.0)<control_input[8])
+							curr_state = 1-curr_state
+					} else {
+						set_wheels(control_input[9],control_input[10])
+						if(math.rng.uniform(1.0)<control_input[11])
+							curr_state = 1-curr_state
+					}
 				}
 				if(math.rng.uniform(1.0)<PROB){
 					curr_state = 1-curr_state
 					#state switching
-					state_vec[1] = state_vec[1]+1
+					state_vec[1] = 1.0
+				} else {
+					state_vec[1] = 0.0
 				}
 			} else {
 				log("proximity sensor not initialized")
