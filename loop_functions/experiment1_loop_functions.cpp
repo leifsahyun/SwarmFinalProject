@@ -451,7 +451,7 @@ Real CMPGAExperiment1LoopFunctions::Score() {
 
 	avg_speed = 0.0; scatter = 0.0; rad_variance = 0.0; ang_momentum = 0.0; grp_rotation = 0.0;
 	homophily = 0.0; switching_freq = 0.0; state_ratio = 0.0;
-	for(int i=0; i<m_pVecScatter.size(); i++) {
+	for(int i=m_pVecScatter.size()-20; i<m_pVecScatter.size(); i++) {
 		avg_speed += m_pVecAvgSpeed.at(i);
 		scatter += m_pVecScatter.at(i);
 		rad_variance += m_pVecRadVariance.at(i);
@@ -472,7 +472,7 @@ Real CMPGAExperiment1LoopFunctions::Score() {
 	state_ratio /= m_pVecScatter.size();
 	
 	/*write code for fscore*/
-	swarm_score = homophily/(scatter*switching_freq);//avg_speed/(scatter*rad_variance*grp_rotation);
+	swarm_score = 1/scatter;//avg_speed/(scatter*rad_variance*grp_rotation);
 	return swarm_score;
 }
 

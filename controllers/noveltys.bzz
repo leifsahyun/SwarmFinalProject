@@ -28,6 +28,7 @@ function init() {
 	curr_state = 0.0
 	state0 = swarm.create(0)
 	state1 = swarm.create(1)
+	refactory = 0
 	while( i < 2) {
 		robot_pose[i] = 0.0
 		Velocity[i] = 0.0
@@ -77,6 +78,15 @@ function step() {
 			else
 				set_leds(0,0,255)
 				
+			rab_obstacle = neighbors.reduce(function(rid,data,accum){
+				if(math.abs(data.azimuth)<0.01){
+					return 1
+				} else {
+					return accum
+				}
+			}
+			, 0)
+
 			total_kin = neighbors.kin().reduce(function(rid,data,accum){
 				if(accum==nil)
 					accum = 0.0
@@ -97,44 +107,49 @@ function step() {
 			else
 				state_vec[0] = 0.0
 
-			if(proximity!=nil){
+			#if(proximity!=nil){
 				state_vec[1] = 0.0
-				if(proximity[0].value>0.05){
+				if(rab_obstacle==1){ #proximity[0].value>0.05){
 					if(curr_state==0.0){
 						set_wheels(control_input[0],control_input[1])
-						if(math.rng.uniform(1.0)<(control_input[2]+10)/20){
+						if(math.rng.uniform(1.0)<(control_input[2]+10)/20 and refactory<=0){
 							#state switching
 							curr_state = 1-curr_state
 							state_vec[1] = 1.0
+							refactory = 5
 						}
 					} else {
 						set_wheels(control_input[3],control_input[4])
-						if(math.rng.uniform(1.0)<(control_input[5]+10)/20){
+						if(math.rng.uniform(1.0)<(control_input[5]+10)/20 and refactory<=0){
 							#state switching
 							curr_state = 1-curr_state
 							state_vec[1] = 1.0
+							refactory = 5
 						}
 					}
 				} else {
 					if(curr_state==0.0){
 						set_wheels(control_input[6],control_input[7])
-						if(math.rng.uniform(1.0)<(control_input[8]+10)/20){
+						if(math.rng.uniform(1.0)<(control_input[8]+10)/20 and refactory<=0){
 							#state switching
 							curr_state = 1-curr_state
 							state_vec[1] = 1.0
+							refactory = 5
 						}
 					} else {
 						set_wheels(control_input[9],control_input[10])
-						if(math.rng.uniform(1.0)<(control_input[11]+10)/20){
+						if(math.rng.uniform(1.0)<(control_input[11]+10)/20 and refactory<=0){
 							#state switching
 							curr_state = 1-curr_state
 							state_vec[1] = 1.0
+							refactory = 5
 						}
 					}
 				}
-			} else {
-				log("proximity sensor not initialized")
-			}
+			refactory = refactory-1
+			#} else {
+			#	log("proximity sensor not initialized")
+			#}
 			state0.leave()
 			state1.leave()
 			state0.select(curr_state==0)
